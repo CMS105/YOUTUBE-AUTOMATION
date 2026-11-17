@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.logging import logger
 from app.database import engine, Base, get_db_type
-from app.routers import health, streamers, permissions, clips
+from app.routers import health, streamers, permissions, clips, ingestion
 
 
 @asynccontextmanager
@@ -59,6 +59,7 @@ app.include_router(health.router, prefix=settings.API_PREFIX)
 app.include_router(streamers.router, prefix=settings.API_PREFIX)
 app.include_router(permissions.router, prefix=settings.API_PREFIX)
 app.include_router(clips.router, prefix=settings.API_PREFIX)
+app.include_router(ingestion.router, prefix=settings.API_PREFIX)
 
 # Serve clip files and thumbnails as static assets
 clips_dir = Path(settings.CLIPS_DIR)

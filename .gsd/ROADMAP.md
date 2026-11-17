@@ -39,14 +39,14 @@ flowchart TD
 
 ---
 
-### Phase 2: Permission Management & Authorized Media Ingestion
-- [ ] Build Permission Service (`backend/app/services/permission_service.py`) enforcing strict creator consent gates.
-- [ ] Implement Streamer & Permission API endpoints (`backend/app/routers/streamers.py`, `permissions.py`).
-- [ ] Adapt File Validation Service (`backend/app/services/file_service.py`) from `visionmate-ai` for video file intake (MIME validation, SHA-256 hashing, size boundaries).
-- [ ] Build Media Ingestion Manager (`backend/app/services/ingestion_service.py`) with `ffprobe` metadata extraction (resolution, duration, fps, codecs).
-- [ ] Implement Ingestion API router (`backend/app/routers/ingestion.py`) with chunked file uploads and local disk spooling (`./data/recordings/`).
-- [ ] Implement automated retention policy service (`backend/app/services/retention_service.py`).
-- [ ] Verify permission-blocking test: reject processing when permission is revoked or missing.
+### Phase 2: Permission Management & Authorized Media Ingestion (Completed)
+- [x] Build Permission Service (`backend/app/services/permission_service.py`) enforcing strict creator consent gates.
+- [x] Implement Streamer & Permission API endpoints (`backend/app/routers/streamers.py`, `permissions.py`).
+- [x] Adapt File Validation Service (`backend/app/services/file_service.py`) from `visionmate-ai` for video file intake (MIME validation, SHA-256 hashing, size boundaries).
+- [x] Build Media Ingestion Manager (`backend/app/services/ingestion_service.py`) with `ffprobe` metadata extraction (resolution, duration, fps, codecs) and OpenCV/PyAV fallback.
+- [x] Implement Ingestion API router (`backend/app/routers/ingestion.py`) with chunked file uploads and local disk spooling (`./data/recordings/`).
+- [x] Implement automated retention policy service (`backend/app/services/retention_service.py`).
+- [x] Verify permission-blocking test: reject processing when permission is revoked or missing (`backend/tests/test_phase2_ingestion.py`).
 
 ---
 
