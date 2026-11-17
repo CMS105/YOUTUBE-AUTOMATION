@@ -41,6 +41,10 @@ data/recordings/*
 data/clips/*
 data/thumbnails/*
 data/temp/*
+backend/data/recordings/*
+backend/data/clips/*
+backend/data/thumbnails/*
+backend/data/temp/*
 !data/recordings/.gitkeep
 !data/clips/.gitkeep
 !data/thumbnails/.gitkeep

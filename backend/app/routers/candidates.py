@@ -16,8 +16,10 @@ from app.domain.schemas.clips import (
     CandidateListResponse,
     CandidateApproveRequest,
     ProcessingJobResponse,
+    ClipResponse,
 )
 from app.services.candidate_service import candidate_service
+from app.services.render_service import render_service
 from app.core.logging import logger
 
 router = APIRouter(prefix="/candidates", tags=["Candidates"])
@@ -186,3 +188,46 @@ def reject_candidate(candidate_id: int, db: Session = Depends(get_db)):
     db.refresh(cand)
     logger.info(f"[CandidateRouter] Candidate #{cand.id} marked as rejected.")
     return cand
+
+
+@router.post("/{candidate_id}/render", response_model=ClipResponse, status_code=201)
+def render_candidate_endpoint(
+    candidate_id: int,
+    req: CandidateApproveRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Renders candidate directly into a vertical 9:16 MP4 clip with
+    chosen preset, animated subtitles, and thumbnail.
+    """
+    cand = db.query(ClipCandidate).filter(ClipCandidate.id == candidate_id).first()
+    if not cand:
+        raise HTTPException(status_code=404, detail="Clip candidate not found")
+
+    rec = db.query(Recording).filter(Recording.id == cand.recording_id).first()
+    if not rec:
+        raise HTTPException(status_code=404, detail="Associated recording not found")
+
+    perm = (
+        db.query(Permission)
+        .filter(Permission.streamer_id == rec.streamer_id, Permission.status == "ACTIVE")
+        .first()
+    )
+    if not perm:
+        raise HTTPException(
+            status_code=403,
+            detail="Cannot render clip: Streamer does not have an ACTIVE permission grant.",
+        )
+
+    try:
+        clip = render_service.render_candidate(
+            db=db,
+            candidate_id=candidate_id,
+            preset=req.preset,
+            custom_title=req.custom_title,
+        )
+        return ClipResponse.model_validate(clip)
+    except Exception as e:
+        logger.error(f"[CandidateRouter] Render execution failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Rendering failed: {str(e)}")
+
