@@ -2,9 +2,9 @@
 GTA 6 AI CLIP FACTORY: AUTONOMOUS GSD EXECUTION TRACKER
 ======================================================================
 Project: GTA 6 AI Clip Factory
-Active Phase: Phase 4 - AI Event Detection & Highlight Scoring
-Last Updated: 2026-11-17T20:57:00Z
-Status: PHASE 3 COMPLETE, PHASE 4 IN PROGRESS
+Active Phase: Phase 5 - FFmpeg Vertical Clipping, Reframing & Dynamic Subtitles
+Last Updated: 2026-11-17T21:07:00Z
+Status: PHASE 4 COMPLETE, PHASE 5 IN PROGRESS
 
 [COMPLETED TASKS]
 - [x] Task-000: Workspace inspection and hardware profiling (NVIDIA RTX 3050 6GB Laptop GPU, CUDA 13.2, PyTorch 2.14.1, OpenCV 5.0.0, Node.js v24.22.0)
@@ -33,9 +33,15 @@ Status: PHASE 3 COMPLETE, PHASE 4 IN PROGRESS
 - [x] Task-023: MediaPipe FaceLandmarker streamer facecam tracking & corner bounding boxes (backend/app/services/facecam_service.py)
 - [x] Task-024: Multi-stage JobWorker pipeline with stage tracking & database persistence (backend/app/services/job_worker.py)
 - [x] Task-025: Verified Phase 3 feature extraction test suite with 100% pass rate (backend/tests/test_phase3_features.py)
+- [x] Task-026: Multi-provider Context Evaluation Service with Gemini/OpenAI & local heuristic engine (backend/app/services/context_service.py)
+- [x] Task-027: Candidate Windowing & Boundary Snapping (scene cuts & speech pauses) (backend/app/services/candidate_service.py)
+- [x] Task-028: Multimodal Composite Scoring (35% Audio, 35% Visual, 30% Context + Facecam Bonus)
+- [x] Task-029: 1D Temporal Non-Maximum Suppression (NMS) deduplication engine
+- [x] Task-030: Dedicated Candidate API Router with approval, rejection, and 403 Permission Guard (backend/app/routers/candidates.py)
+- [x] Task-031: Verified Phase 4 highlight scoring test suite with 100% pass rate (backend/tests/test_phase4_scoring.py)
 
 [IN PROGRESS / NEXT OBJECTIVE]
-- [ ] Phase 4: Candidate Generation, Multimodal Scoring & Highlight Detection (Score fusion, VLM context, temporal NMS, candidate API)
+- [ ] Phase 5: FFmpeg Vertical Clipping, Reframing & Subtitle Rendering (Presets, ASS subtitles, NVENC, loudnorm, thumbnails)
 
 ======================================================================
 SESSION EXECUTION LOG:

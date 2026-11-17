@@ -60,12 +60,13 @@ flowchart TD
 
 ---
 
-### Phase 4: AI Event Detection, Scoring & Candidate Windowing
-- [ ] Build Candidate Windowing Service (`backend/app/services/candidate_service.py`): synthesize audio and visual event peaks into 15–60s windows with boundary snapping to natural speech pauses or scene cuts.
-- [ ] Implement Multi-Modal Scoring Algorithm combining Audio Excitement (35%), Visual Action (35%), and Context (30%).
-- [ ] Adapt `vlm_service.py` from `visionmate-ai` into a Context Evaluation Service (`backend/app/services/context_service.py`) supporting Google Gemini 1.5 Flash, OpenAI GPT-4o-mini, and a deterministic local heuristic fallback.
-- [ ] Implement Temporal Non-Maximum Suppression (NMS) to eliminate overlapping duplicate candidates.
-- [ ] Expose Candidate API endpoints (`backend/app/routers/candidates.py`) to list, inspect, and approve highlight candidates.
+### Phase 4: AI Event Detection, Scoring & Candidate Windowing (Completed)
+- [x] Build Candidate Windowing Service (`backend/app/services/candidate_service.py`): synthesize audio and visual event peaks into 15–60s windows with boundary snapping to natural speech pauses or scene cuts.
+- [x] Implement Multi-Modal Scoring Algorithm combining Audio Excitement (35%), Visual Action (35%), and Context (30%) plus facecam bonus.
+- [x] Adapt `vlm_service.py` from `visionmate-ai` into a Context Evaluation Service (`backend/app/services/context_service.py`) supporting Google Gemini 1.5 Flash, OpenAI GPT-4o-mini, and a deterministic local heuristic fallback.
+- [x] Implement 1D Temporal Non-Maximum Suppression (NMS) to eliminate overlapping duplicate candidates.
+- [x] Expose Candidate API endpoints (`backend/app/routers/candidates.py`) to list, inspect, approve (with preset selection), and reject highlight candidates.
+- [x] Verified Phase 4 highlight scoring test suite with 100% pass rate (`backend/tests/test_phase4_scoring.py`).
 
 ---
 

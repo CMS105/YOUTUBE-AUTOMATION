@@ -45,11 +45,20 @@ class ClipCandidateResponse(BaseModel):
     event_category: str
     status: str
     has_facecam: bool
-    transcript_text: Optional[str]
-    suggested_titles: Optional[list]
+    facecam_region: Optional[dict] = None
+    transcript_text: Optional[str] = None
+    suggested_titles: Optional[list] = None
+    metadata_json: Optional[dict] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CandidateListResponse(BaseModel):
+    items: List[ClipCandidateResponse]
+    total: int
+    skip: int
+    limit: int
 
 
 class CandidateApproveRequest(BaseModel):
