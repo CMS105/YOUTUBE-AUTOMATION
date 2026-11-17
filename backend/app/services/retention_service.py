@@ -81,5 +81,41 @@ class RetentionService:
             "retention_days_threshold": days,
         }
 
+    @staticmethod
+    def get_storage_usage(db: Session) -> Dict[str, Any]:
+        """Calculates storage usage across recordings, clips, thumbnails, and temp."""
+        total_recs = db.query(Recording).count()
+        total_clips = db.query(Clip).count()
+
+        def dir_size(path_str: str) -> int:
+            p = Path(path_str)
+            if not p.exists():
+                return 0
+            return sum(f.stat().st_size for f in p.glob("**/*") if f.is_file())
+
+        recs_bytes = dir_size(settings.RECORDINGS_DIR)
+        clips_bytes = dir_size(settings.CLIPS_DIR)
+        thumbs_bytes = dir_size(settings.THUMBNAILS_DIR)
+        temp_bytes = dir_size(settings.TEMP_DIR)
+        total_bytes = recs_bytes + clips_bytes + thumbs_bytes + temp_bytes
+
+        total_mb = round(total_bytes / (1024 * 1024), 2)
+        total_gb = round(total_bytes / (1024 * 1024 * 1024), 3)
+
+        return {
+            "total_quota_gb": settings.MAX_STORAGE_QUOTA_GB,
+            "used_storage_gb": total_gb,
+            "used_storage_mb": total_mb,
+            "used_percentage": round((total_gb / settings.MAX_STORAGE_QUOTA_GB) * 100, 2),
+            "recordings_mb": round(recs_bytes / (1024 * 1024), 2),
+            "clips_mb": round(clips_bytes / (1024 * 1024), 2),
+            "thumbnails_mb": round(thumbs_bytes / (1024 * 1024), 2),
+            "temp_mb": round(temp_bytes / (1024 * 1024), 2),
+            "total_recordings": total_recs,
+            "total_clips": total_clips,
+            "recordings_dir": settings.RECORDINGS_DIR,
+            "clips_dir": settings.CLIPS_DIR,
+        }
+
 
 retention_service = RetentionService()

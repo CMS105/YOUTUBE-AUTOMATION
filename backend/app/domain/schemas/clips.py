@@ -1,7 +1,7 @@
 """Pydantic schemas for Clip, ClipCandidate, Recording, and Processing Job entities."""
 
 from datetime import datetime
-from typing import Optional, Literal, List
+from typing import Optional, Literal, List, Any, Dict, Union
 from pydantic import BaseModel, ConfigDict, Field
 
 ClipPreset = Literal["Viral Gaming", "Clean Gameplay", "Reaction Focus"]
@@ -47,7 +47,7 @@ class ClipCandidateResponse(BaseModel):
     has_facecam: bool
     facecam_region: Optional[dict] = None
     transcript_text: Optional[str] = None
-    suggested_titles: Optional[list] = None
+    suggested_titles: Optional[Any] = None
     metadata_json: Optional[dict] = None
     created_at: datetime
 

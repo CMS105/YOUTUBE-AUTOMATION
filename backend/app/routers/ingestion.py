@@ -111,3 +111,9 @@ def probe_file_metadata(file_path: str):
     if not p.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
     return ingestion_service.probe_video_metadata(p)
+
+
+@router.get("/storage/status")
+def get_storage_status(db: Session = Depends(get_db)):
+    """Returns current disk usage, recording counts, quota, and cleanup metrics."""
+    return retention_service.get_storage_usage(db)

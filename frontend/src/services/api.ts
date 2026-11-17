@@ -57,6 +57,27 @@ export interface Clip {
   download_url?: string;
 }
 
+export interface ClipCandidate {
+  id: number;
+  uuid: string;
+  recording_id: number;
+  start_time: number;
+  end_time: number;
+  duration: number;
+  score_audio: number;
+  score_visual: number;
+  score_context: number;
+  score_composite: number;
+  rank: number | null;
+  event_category: string;
+  status: "pending" | "approved" | "rejected" | "rendered";
+  has_facecam: boolean;
+  facecam_region?: { x: number; y: number; w: number; h: number } | null;
+  transcript_text: string | null;
+  suggested_titles: string[] | null;
+  created_at: string;
+}
+
 export interface ProcessingJob {
   id: number;
   uuid: string;
@@ -174,4 +195,28 @@ export const api = {
   createJob: (recordingId: number) =>
     fetchApi<ProcessingJob>("/jobs", { method: "POST", body: JSON.stringify({ recording_id: recordingId }) }),
   cancelJob: (jobId: number) => fetchApi<ProcessingJob>(`/jobs/${jobId}/cancel`, { method: "POST" }),
+
+  // Candidates
+  getCandidates: (recordingId?: number, status?: string, minScore?: number) => {
+    const params = new URLSearchParams();
+    if (recordingId) params.append("recording_id", String(recordingId));
+    if (status) params.append("status", status);
+    if (minScore !== undefined) params.append("min_score", String(minScore));
+    return fetchApi<{ items: ClipCandidate[]; total: number; skip: number; limit: number }>(`/candidates?${params}`);
+  },
+  getCandidate: (id: number) => fetchApi<ClipCandidate>(`/candidates/${id}`),
+  generateCandidates: (recordingId: number, count = 10) =>
+    fetchApi<ClipCandidate[]>(`/candidates/generate/${recordingId}?count=${count}`, { method: "POST" }),
+  approveCandidate: (candidateId: number, preset = "Viral Gaming", customTitle?: string) =>
+    fetchApi<ProcessingJob>(`/candidates/${candidateId}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ preset, custom_title: customTitle }),
+    }),
+  renderCandidate: (candidateId: number, preset = "Viral Gaming", customTitle?: string) =>
+    fetchApi<Clip>(`/candidates/${candidateId}/render`, {
+      method: "POST",
+      body: JSON.stringify({ preset, custom_title: customTitle }),
+    }),
+  rejectCandidate: (candidateId: number) =>
+    fetchApi<ClipCandidate>(`/candidates/${candidateId}/reject`, { method: "POST" }),
 };

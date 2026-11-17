@@ -82,20 +82,12 @@ flowchart TD
 
 ---
 
-### Phase 6: Clip Library, Production Dashboard & Video Editor
-- [ ] Build 10 production dashboard pages in Next.js:
-  1. `Overview` (production stats, active jobs, hardware utilization)
-  2. `Stream Monitor` (streamer cards, live status badges, capture triggers)
-  3. `Streamers` (creator roster, profile links, permission indicators)
-  4. `Clip Library` (searchable/filterable media gallery with video preview)
-  5. `Clip Editor` (interactive waveform trimmer, preset switcher, subtitle editor)
-  6. `Processing Queue` (real-time progress bars, stage status, cancel/retry)
-  7. `Analytics` (Recharts score distribution, generation speed, yield charts)
-  8. `Permissions` (creator consent audit, grant/revoke actions)
-  9. `Storage` (disk usage breakdown, retention policies, 1-click purge)
-  10. `Settings & Integrations` (API keys, hardware mode, preset defaults)
-- [ ] Connect frontend to FastAPI endpoints with full CRUD capabilities.
-- [ ] Implement real-time status polling / SSE for active render jobs.
+### Phase 6: Clip Library, Production Dashboard & Video Editor (Completed)
+- [x] Build 10 production dashboard pages in Next.js 15 Dark Gaming UI (`Overview`, `Stream Monitor`, `Streamers`, `Clip Library`, `Clip Editor`, `Processing Queue`, `Analytics`, `Permissions`, `Storage`, `Settings & Integrations`).
+- [x] Connect frontend to FastAPI endpoints with full type-safe API client service (`frontend/src/services/api.ts`).
+- [x] Implement real-time status polling and job cancel/retry in Processing Queue (`frontend/src/app/queue/page.tsx`).
+- [x] Implement interactive fine-tuning studio with candidate selector, preset switching, dynamic subtitle color, and render trigger (`frontend/src/app/editor/page.tsx`).
+- [x] Verify all 8 dashboard API endpoints with 100% pass rate (`backend/tests/test_phase6_dashboard_api.py`).
 
 ---
 
