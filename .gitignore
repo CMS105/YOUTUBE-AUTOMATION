@@ -37,6 +37,8 @@ client_secrets.json
 *.db
 *.db-shm
 *.db-wal
+*.zip
+.pytest_cache/
 data/recordings/*
 data/clips/*
 data/thumbnails/*
@@ -45,6 +47,7 @@ backend/data/recordings/*
 backend/data/clips/*
 backend/data/thumbnails/*
 backend/data/temp/*
+backend/data/storage/*
 !data/recordings/.gitkeep
 !data/clips/.gitkeep
 !data/thumbnails/.gitkeep
