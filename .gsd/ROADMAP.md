@@ -50,13 +50,13 @@ flowchart TD
 
 ---
 
-### Phase 3: Audio & Visual Feature Extraction Engine
-- [ ] Adapt `stt_service.py` from `visionmate-ai`: load `faster-whisper` on GPU float16 with PyAV patch and word-level timestamps.
-- [ ] Build Audio Analysis Service (`backend/app/services/audio_analysis_service.py`): compute 500ms RMS energy windows, spectral flux, and vocal spike detection ($\ge 2.5\sigma$).
-- [ ] Build Visual Scene Service (`backend/app/services/visual_analysis_service.py`): integrate PySceneDetect for cut detection and OpenCV frame differencing for gameplay action energy.
-- [ ] Adapt MediaPipe FaceLandmarker from `liveness_detection` into an offline frame-sampling service (`backend/app/services/facecam_service.py`) to detect streamer facecam presence and stabilized coordinates.
-- [ ] Implement Background Job Manager (`backend/app/services/job_service.py`) tracking progress percentages and memory safety.
-- [ ] Test feature extraction on sample gameplay clip.
+### Phase 3: Audio & Visual Feature Extraction Engine (Completed)
+- [x] Adapt `stt_service.py` from `visionmate-ai`: load `faster-whisper` on GPU float16 / CPU int8 with PyAV patch and word-level timestamps.
+- [x] Build Audio Analysis Service (`backend/app/services/audio_analysis_service.py`): compute 500ms RMS energy windows, spectral flux, and vocal spike detection ($\ge 2.5\sigma$).
+- [x] Build Visual Scene Service (`backend/app/services/visual_analysis_service.py`): integrate PySceneDetect / OpenCV HSV correlation for cut detection and frame differencing for gameplay action energy.
+- [x] Adapt MediaPipe FaceLandmarker from `liveness_detection` into an offline frame-sampling service (`backend/app/services/facecam_service.py`) to detect streamer facecam presence and stabilized coordinates.
+- [x] Implement Multi-stage Job Worker (`backend/app/services/job_worker.py`) tracking progress percentages, database event logging, and memory safety.
+- [x] Test feature extraction on sample gameplay clip with 100% pass rate (`backend/tests/test_phase3_features.py`).
 
 ---
 

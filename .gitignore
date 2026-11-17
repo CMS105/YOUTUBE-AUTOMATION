@@ -35,6 +35,8 @@ client_secrets.json
 # Database & Storage
 *.sqlite3
 *.db
+*.db-shm
+*.db-wal
 data/recordings/*
 data/clips/*
 data/thumbnails/*

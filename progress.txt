@@ -2,9 +2,9 @@
 GTA 6 AI CLIP FACTORY: AUTONOMOUS GSD EXECUTION TRACKER
 ======================================================================
 Project: GTA 6 AI Clip Factory
-Active Phase: Phase 2 - Permission Management & Authorized Media Ingestion
-Last Updated: 2026-11-17T20:49:00Z
-Status: PHASE 2 COMPLETE & VERIFIED
+Active Phase: Phase 4 - AI Event Detection & Highlight Scoring
+Last Updated: 2026-11-17T20:57:00Z
+Status: PHASE 3 COMPLETE, PHASE 4 IN PROGRESS
 
 [COMPLETED TASKS]
 - [x] Task-000: Workspace inspection and hardware profiling (NVIDIA RTX 3050 6GB Laptop GPU, CUDA 13.2, PyTorch 2.14.1, OpenCV 5.0.0, Node.js v24.22.0)
@@ -27,9 +27,15 @@ Status: PHASE 2 COMPLETE & VERIFIED
 - [x] Task-017: Implemented Retention and Storage Service for disk quota enforcement (backend/app/services/retention_service.py)
 - [x] Task-018: Implemented Ingestion API router for uploads and local registration (backend/app/routers/ingestion.py)
 - [x] Task-019: Verified Phase 2 with full integration test suite (backend/tests/test_phase2_ingestion.py)
+- [x] Task-020: Faster-Whisper GPU/CPU speech-to-text with PyAV>=14 compatibility & word timestamps (backend/app/services/stt_service.py)
+- [x] Task-021: Audio RMS energy windowing and vocal excitement burst detection (backend/app/services/audio_analysis_service.py)
+- [x] Task-022: Visual action curve & HSV histogram scene-cut detection (backend/app/services/visual_analysis_service.py)
+- [x] Task-023: MediaPipe FaceLandmarker streamer facecam tracking & corner bounding boxes (backend/app/services/facecam_service.py)
+- [x] Task-024: Multi-stage JobWorker pipeline with stage tracking & database persistence (backend/app/services/job_worker.py)
+- [x] Task-025: Verified Phase 3 feature extraction test suite with 100% pass rate (backend/tests/test_phase3_features.py)
 
 [IN PROGRESS / NEXT OBJECTIVE]
-- [ ] Phase 3: Audio & Visual Feature Extraction Engine (Whisper GPU STT, RMS Energy, PySceneDetect cuts, MediaPipe Facecam)
+- [ ] Phase 4: Candidate Generation, Multimodal Scoring & Highlight Detection (Score fusion, VLM context, temporal NMS, candidate API)
 
 ======================================================================
 SESSION EXECUTION LOG:
