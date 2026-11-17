@@ -134,6 +134,13 @@ class JobWorker:
             job.current_stage = "Feature extraction complete"
             job.completed_at = datetime.now(timezone.utc)
 
+            rec_meta = dict(rec.metadata_json or {})
+            rec_meta["facecam"] = {
+                "has_facecam": has_cam,
+                "location": cam_loc,
+                "box": cam_box,
+            }
+            rec.metadata_json = rec_meta
             rec.status = "features_extracted"
             db.commit()
             db.refresh(job)

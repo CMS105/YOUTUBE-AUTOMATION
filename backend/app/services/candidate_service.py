@@ -101,10 +101,11 @@ class CandidateService:
         logger.info(f"[CandidateService] Synthesized {len(raw_windows)} candidate windows.")
 
         # 2. Score candidate windows
+        effective_min = min(self.min_duration, total_duration)
         scored_candidates: List[Dict[str, Any]] = []
         for w_start, w_end in raw_windows:
             w_duration = round(w_end - w_start, 2)
-            if w_duration < self.min_duration or w_duration > self.max_duration:
+            if w_duration < effective_min or w_duration > self.max_duration:
                 continue
 
             # Audio score in window
@@ -244,11 +245,12 @@ class CandidateService:
             # Snap to transcript boundary if available
             w_start, w_end = self._snap_to_transcript_bounds(w_start, w_end, transcripts)
 
+            effective_min = min(self.min_duration, total_duration)
             # Ensure minimum duration
-            if (w_end - w_start) < self.min_duration:
-                w_end = min(total_duration, w_start + self.min_duration)
-                if (w_end - w_start) < self.min_duration:
-                    w_start = max(0.0, w_end - self.min_duration)
+            if (w_end - w_start) < effective_min:
+                w_end = min(total_duration, w_start + effective_min)
+                if (w_end - w_start) < effective_min:
+                    w_start = max(0.0, w_end - effective_min)
 
             # Ensure maximum duration
             if (w_end - w_start) > self.max_duration:
@@ -264,8 +266,12 @@ class CandidateService:
         step = 25.0
         window_size = 30.0
 
+        effective_min = min(self.min_duration, total_duration)
+        if total_duration <= self.min_duration:
+            return [(0.0, round(total_duration, 2))]
+
         current = 0.0
-        while (current + self.min_duration) <= total_duration:
+        while (current + effective_min) <= total_duration:
             end = min(total_duration, current + window_size)
             windows.append((round(current, 2), round(end, 2)))
             current += step
