@@ -15,3 +15,4 @@ Once approved:
 1. Update `.gsd/ROADMAP.md` and `progress.txt`.
 2. Execute tasks sequentially following GSD guidelines.
 3. Verify with end-to-end unit and integration tests before marking tasks completed.
+

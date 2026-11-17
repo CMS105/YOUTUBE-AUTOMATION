@@ -25,3 +25,4 @@ Upon completing an implementation milestone:
 1. **Record Architectural Decisions**: Document any new schema or threshold adjustments in `.gsd/PROJECT.md`.
 2. **Update `progress.txt`**: Move the completed step to `[COMPLETED TASKS]` with a timestamp.
 3. **Commit Incrementally**: Ensure atomic, descriptive git commit messages (`feat:`, `fix:`, `test:`, `docs:`).
+

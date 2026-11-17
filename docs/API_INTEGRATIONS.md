@@ -131,3 +131,4 @@ The GTA 6 AI Clip Factory is designed with a **Hybrid Edge-First Architecture**:
 2. **Never Committed to Git:** `.gitignore` explicitly excludes `.env`, `*.key`, `*.pem`, and `credentials.json`.
 3. **No Secret Leaks in Responses:** API endpoints that report integration status (e.g., `GET /api/v1/integrations/status`) return booleans and masked identifiers only (e.g. `{"gemini_connected": true, "key_hint": "...aB4x"}`).
 4. **Credential Validation at Boot:** During application startup, a non-blocking diagnostic routine verifies key formats and network reachability.
+

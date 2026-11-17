@@ -114,3 +114,4 @@ The application is explicitly engineered for the host workstation:
 3. **Render Speed:** FFmpeg rendering at $\ge 2.0\times$ realtime speed using NVENC acceleration on RTX 3050.
 4. **Transcription Accuracy:** Accurate word-level timestamps with synchronous burned-in subtitle highlighting.
 5. **Zero Data Hallucination:** 100% of dashboard metrics, streamers, jobs, and clips ground directly in database state and physical files.
+

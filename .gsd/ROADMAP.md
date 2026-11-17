@@ -27,15 +27,15 @@ flowchart TD
 
 ---
 
-### Phase 1: Architecture, Database, Backend & Frontend Foundation
-- [ ] Establish backend directory structure: `backend/app/{core, domain, infra, routers, services}`.
-- [ ] Adapt centralized configuration module (`backend/app/core/config.py`) from `visionmate-ai` with GPU/CPU auto-resolution.
-- [ ] Configure database engine (`backend/app/database.py`) using SQLAlchemy 2.0 and modern `psycopg` (v3).
-- [ ] Implement complete SQLAlchemy relational models in `backend/app/models.py` (`Streamer`, `Permission`, `Stream`, `MediaSource`, `Recording`, `DetectedEvent`, `ClipCandidate`, `Clip`, `Thumbnail`, `ProcessingJob`, `UserSettings`, `AuditLog`).
-- [ ] Setup Alembic migration environment (`backend/alembic/`) adapted from `TETHR-Bluetooth-Payments` and generate initial migration.
-- [ ] Implement Pydantic v2 domain schemas (`backend/app/domain/schemas/`).
-- [ ] Scaffold Next.js 15 frontend application in `frontend/` with Tailwind CSS, Lucide React, and Dark Gaming palette.
-- [ ] Verify backend and frontend foundation boots cleanly.
+### Phase 1: Architecture, Database, Backend & Frontend Foundation (Completed)
+- [x] Establish backend directory structure: `backend/app/{core, domain, infra, routers, services}`.
+- [x] Adapt centralized configuration module (`backend/app/core/config.py`) from `visionmate-ai` with GPU/CPU auto-resolution.
+- [x] Configure database engine (`backend/app/database.py`) using SQLAlchemy 2.0 and modern `psycopg` (v3) with SQLite WAL fallback.
+- [x] Implement complete SQLAlchemy relational models in `backend/app/models.py` (`Streamer`, `Permission`, `Stream`, `MediaSource`, `Recording`, `DetectedEvent`, `ClipCandidate`, `Clip`, `Thumbnail`, `ProcessingJob`, `UserSettings`, `AuditLog`).
+- [x] Setup Alembic migration environment (`backend/alembic/`) adapted from `TETHR-Bluetooth-Payments` and generate initial migration.
+- [x] Implement Pydantic v2 domain schemas (`backend/app/domain/schemas/`).
+- [x] Scaffold Next.js 15 frontend application in `frontend/` with Tailwind CSS, Lucide React, and Dark Gaming palette (10 production pages).
+- [x] Verify backend and frontend foundation boots cleanly (`backend/test_api_direct.py`).
 
 ---
 
@@ -118,3 +118,4 @@ flowchart TD
   - Zero-key offline fallback execution.
 - [ ] Create one-click Windows launcher (`run_factory.bat` / `run_factory.ps1`).
 - [ ] Finalize user documentation and operation manual.
+

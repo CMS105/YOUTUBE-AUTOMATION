@@ -88,3 +88,4 @@ The frontend application shall provide 10 functional, high-density pages:
 * **PERF-01 [Processing Latency]**: A 10-minute gameplay recording must be fully analyzed, scored, and clipped into top candidates within $< 5$ minutes on the RTX 3050.
 * **RELIABILITY-01 [Job Recovery]**: Any processing job interrupted by an unexpected crash or server reboot must restart or transition to `FAILED` with actionable error logs upon restart.
 * **ACCURACY-01 [Zero Hallucination]**: Every stream status, clip candidate, and performance metric displayed on the dashboard must correspond to real database records and physical disk files.
+

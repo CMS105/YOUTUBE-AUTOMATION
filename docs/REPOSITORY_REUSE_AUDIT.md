@@ -132,3 +132,4 @@ Every evaluated component is categorized under one of three strict classificatio
 2. **Zero Cross-Workspace Imports:** Under no circumstances will runtime code attempt `sys.path.append` to import from sibling directories (`demo123`, `visionmate-ai`, `BMSC-HACKATHON`). Reusable logic must be extracted into clean, self-maintained modules.
 3. **Immutability of Source Repos:** The original five repositories will never be modified or overwritten.
 4. **Environment Isolation:** Secrets and configuration must be managed strictly via local `.env` files matching `.env.example`.
+
