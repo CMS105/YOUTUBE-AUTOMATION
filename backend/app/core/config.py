@@ -91,6 +91,24 @@ class Settings(BaseSettings):
     # --- Safety Guard ---
     ENABLE_AUTO_PUBLISH: bool = False
 
+    # --- OBS Studio WebSocket Integration ---
+    OBS_HOST: str = "127.0.0.1"
+    OBS_PORT: int = 4455
+    OBS_PASSWORD: Optional[str] = None
+    OBS_ENABLED: bool = True
+    OBS_RECORDING_DIRECTORY: Optional[str] = None
+
+    # --- Global Livestream Discovery ---
+    YOUTUBE_DISCOVERY_KEYWORDS: str = "GTA 6,GTA VI,Grand Theft Auto 6,GTA 6 gameplay,GTA 6 online,GTA 6 live"
+    YOUTUBE_DISCOVERY_INTERVAL_SECONDS: int = 180
+    AUTO_DISCOVERY_ENABLED: bool = True
+
+    # --- Automated Recording & Pipeline ---
+    AUTO_RECORD_AUTHORIZED: bool = True
+    MAX_RECORDING_DURATION_MINUTES: int = 30
+    MIN_DISK_FREE_SPACE_GB: float = 5.0
+    AUTO_PROCESS_AFTER_RECORDING: bool = True
+
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / ".env"),
         env_file_encoding="utf-8",
@@ -174,6 +192,10 @@ class Settings(BaseSettings):
             return "openai"
         return "local"
 
+    @property
+    def discovery_keywords_list(self) -> List[str]:
+        return [k.strip() for k in self.YOUTUBE_DISCOVERY_KEYWORDS.split(",") if k.strip()]
+
     def mask_key(self, key: Optional[str]) -> str:
         """Masks API key for safe display: shows first 4 and last 4 chars."""
         if not key or len(key) < 12:
@@ -187,6 +209,17 @@ class Settings(BaseSettings):
                 "configured": self.has_youtube_api,
                 "key_hint": self.mask_key(self.YOUTUBE_API_KEY),
                 "poll_interval_s": self.YOUTUBE_POLL_INTERVAL_SECONDS,
+                "discovery_interval_s": self.YOUTUBE_DISCOVERY_INTERVAL_SECONDS,
+                "auto_discovery_enabled": self.AUTO_DISCOVERY_ENABLED,
+            },
+            "obs_websocket": {
+                "enabled": self.OBS_ENABLED,
+                "host": self.OBS_HOST,
+                "port": self.OBS_PORT,
+                "password_configured": bool(self.OBS_PASSWORD),
+                "auto_record_authorized": self.AUTO_RECORD_AUTHORIZED,
+                "max_recording_minutes": self.MAX_RECORDING_DURATION_MINUTES,
+                "min_disk_free_gb": self.MIN_DISK_FREE_SPACE_GB,
             },
             "youtube_oauth": {
                 "configured": self.has_youtube_oauth,

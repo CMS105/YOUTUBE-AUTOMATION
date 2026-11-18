@@ -5,13 +5,19 @@ Provides endpoints for YouTube API status, key verification,
 streamer live status polling, and channel metadata inspection.
 """
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models import LiveDiscovery
 from app.services.youtube_monitor_service import youtube_monitor_service
+from app.domain.schemas.discovery import (
+    LiveDiscoveryResponse,
+    LiveDiscoveryListResponse,
+    PollDiscoveryRequest,
+)
 from app.core.config import settings
 
 router = APIRouter(prefix="/youtube", tags=["YouTube Monitoring"])
@@ -76,3 +82,83 @@ def get_channel_details(channel_id: str):
             detail=f"Channel info not found or YouTube API unavailable for '{channel_id}'",
         )
     return info
+
+
+# ---------------------------------------------------------------------------
+# GLOBAL GTA 6 LIVESTREAM DISCOVERIES
+# ---------------------------------------------------------------------------
+@router.get("/discoveries", response_model=LiveDiscoveryListResponse)
+def list_discoveries(
+    live_status: Optional[str] = Query(None, description="Filter by live status: 'live', 'ended', 'unavailable'"),
+    authorization_status: Optional[str] = Query(None, description="Filter: 'AUTHORIZED', 'AWAITING_AUTHORIZATION', 'REVOKED'"),
+    recording_status: Optional[str] = Query(None, description="Filter: 'IDLE', 'RECORDING', 'RECORDED', 'PROCESSING', 'CLIPPED', 'FAILED'"),
+    search: Optional[str] = Query(None, description="Search channel title or stream title"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """
+    Returns discovered public GTA 6 livestreams with filtering, search, and recording states.
+    """
+    query = db.query(LiveDiscovery)
+
+    if live_status:
+        query = query.filter(LiveDiscovery.live_status == live_status.lower())
+    if authorization_status:
+        query = query.filter(LiveDiscovery.authorization_status == authorization_status.upper())
+    if recording_status:
+        query = query.filter(LiveDiscovery.recording_status == recording_status.upper())
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            (LiveDiscovery.title.ilike(search_filter))
+            | (LiveDiscovery.channel_title.ilike(search_filter))
+            | (LiveDiscovery.channel_id.ilike(search_filter))
+        )
+
+    total = query.count()
+    items = query.order_by(LiveDiscovery.detected_at.desc()).offset(skip).limit(limit).all()
+
+    live_count = db.query(LiveDiscovery).filter(LiveDiscovery.live_status == "live").count()
+    authorized_count = db.query(LiveDiscovery).filter(LiveDiscovery.authorization_status == "AUTHORIZED").count()
+    recording_count = db.query(LiveDiscovery).filter(LiveDiscovery.recording_status == "RECORDING").count()
+
+    return {
+        "items": items,
+        "total": total,
+        "live_count": live_count,
+        "authorized_count": authorized_count,
+        "recording_count": recording_count,
+        "quota_status": youtube_monitor_service.quota_tracker.get_status(),
+    }
+
+
+@router.post("/discoveries/poll")
+def poll_global_discoveries(
+    req: Optional[PollDiscoveryRequest] = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Triggers an official YouTube Data API v3 search for active GTA 6 livestreams.
+    """
+    query = req.query if req else None
+    max_results = req.max_results if req else 15
+
+    result = youtube_monitor_service.discover_gta6_livestreams(
+        db=db,
+        query=query,
+        max_results=max_results,
+    )
+    return result
+
+
+@router.get("/discoveries/{discovery_id}", response_model=LiveDiscoveryResponse)
+def get_discovery_detail(discovery_id: int, db: Session = Depends(get_db)):
+    """
+    Returns full details for a single discovered livestream.
+    """
+    disc = db.query(LiveDiscovery).filter(LiveDiscovery.id == discovery_id).first()
+    if not disc:
+        raise HTTPException(status_code=404, detail=f"Discovery #{discovery_id} not found.")
+    return disc
+

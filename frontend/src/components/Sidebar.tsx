@@ -15,10 +15,16 @@ import {
   Settings,
   Flame,
   CheckCircle2,
+  Compass,
+  CircleDot,
+  KeyRound,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Overview", href: "/", icon: Flame },
+  { label: "Live Discoveries", href: "/discoveries", icon: Compass },
+  { label: "OBS Recording", href: "/obs", icon: CircleDot },
+  { label: "Authorizations", href: "/authorizations", icon: KeyRound },
   { label: "Stream Monitor", href: "/stream-monitor", icon: Radio },
   { label: "Streamers", href: "/streamers", icon: Users },
   { label: "Clip Library", href: "/clips", icon: Film },

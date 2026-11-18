@@ -119,6 +119,28 @@ export default function SettingsPage() {
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
+
+          {/* OBS Studio WebSocket */}
+          <div className="p-4 rounded-lg bg-surface-elevated border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div>
+              <div className="font-bold text-text-primary flex items-center gap-2">
+                <span>OBS Studio WebSocket v5</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">
+                  PORT 4455
+                </span>
+              </div>
+              <div className="text-text-muted mt-1">
+                Enables automated hands-free livestream recording for authorized creator feeds.
+              </div>
+            </div>
+            <a
+              href="/obs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-border text-accent-cyan font-medium text-xs self-start md:self-auto"
+            >
+              <span>OBS Control Hub</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
       </div>
 

@@ -376,3 +376,104 @@ class AuditLog(Base):
         Index("ix_audit_logs_created", "created_at"),
     )
 
+
+# ---------------------------------------------------------------------------
+# 13. LIVE DISCOVERY (Global YouTube Livestream Monitoring)
+# ---------------------------------------------------------------------------
+class LiveDiscovery(Base):
+    __tablename__ = "live_discoveries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    video_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    channel_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    channel_title: Mapped[str] = mapped_column(String(200), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    stream_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    live_status: Mapped[str] = mapped_column(String(30), nullable=False, default="live", index=True)
+    authorization_status: Mapped[str] = mapped_column(String(30), nullable=False, default="AWAITING_AUTHORIZATION", index=True)
+    recording_status: Mapped[str] = mapped_column(String(30), nullable=False, default="IDLE", index=True)
+    viewer_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    recording_sessions: Mapped[List["RecordingSession"]] = relationship("RecordingSession", back_populates="discovery", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint("live_status IN ('live', 'ended', 'unavailable')", name="ck_discoveries_valid_live_status"),
+        CheckConstraint("authorization_status IN ('AUTHORIZED', 'AWAITING_AUTHORIZATION', 'REVOKED')", name="ck_discoveries_valid_auth_status"),
+        CheckConstraint("recording_status IN ('IDLE', 'RECORDING', 'RECORDED', 'PROCESSING', 'CLIPPED', 'FAILED')", name="ck_discoveries_valid_recording_status"),
+        Index("ix_discoveries_channel_live", "channel_id", "live_status"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# 14. CREATOR AUTHORIZATION (Explicit Permission & Ingest Input)
+# ---------------------------------------------------------------------------
+class CreatorAuthorization(Base):
+    __tablename__ = "creator_authorizations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    channel_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    creator_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="PENDING", index=True)
+    authorized_source: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # RTMP, SRT, capture_feed, or OBS scene/window
+    allowed_scope: Mapped[str] = mapped_column(String(100), nullable=False, default="clip_creation")
+    authorized_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    revocation_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    streamer_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("streamers.id", ondelete="SET NULL"), nullable=True)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    streamer: Mapped[Optional["Streamer"]] = relationship("Streamer")
+    recording_sessions: Mapped[List["RecordingSession"]] = relationship("RecordingSession", back_populates="authorization", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint("status IN ('ACTIVE', 'PENDING', 'REVOKED', 'EXPIRED')", name="ck_creator_auth_valid_status"),
+        CheckConstraint("allowed_scope IN ('clip_creation', 'full_access')", name="ck_creator_auth_valid_scope"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# 15. RECORDING SESSION (Automated OBS / Pipeline Recording)
+# ---------------------------------------------------------------------------
+class RecordingSession(Base):
+    __tablename__ = "recording_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, default=_uuid_hex, index=True)
+    discovery_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("live_discoveries.id", ondelete="SET NULL"), nullable=True)
+    authorization_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("creator_authorizations.id", ondelete="SET NULL"), nullable=True)
+    channel_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    video_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
+    source_input: Mapped[str] = mapped_column(String(500), nullable=False)
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="recording", index=True)
+    obs_output_path: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    recording_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("recordings.id", ondelete="SET NULL"), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    duration_seconds: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    discovery: Mapped[Optional["LiveDiscovery"]] = relationship("LiveDiscovery", back_populates="recording_sessions")
+    authorization: Mapped[Optional["CreatorAuthorization"]] = relationship("CreatorAuthorization", back_populates="recording_sessions")
+    recording: Mapped[Optional["Recording"]] = relationship("Recording")
+
+    __table_args__ = (
+        CheckConstraint("status IN ('recording', 'completed', 'failed', 'aborted')", name="ck_recording_sessions_valid_status"),
+        Index("ix_recording_sessions_status_started", "status", "started_at"),
+    )
+

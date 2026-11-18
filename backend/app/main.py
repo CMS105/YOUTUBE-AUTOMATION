@@ -13,8 +13,12 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.logging import logger
-from app.database import engine, Base, get_db_type
-from app.routers import health, streamers, permissions, clips, ingestion, candidates, youtube
+from app.database import engine, Base, get_db_type, SessionLocal
+from app.routers import (
+    health, streamers, permissions, clips, ingestion,
+    candidates, youtube, authorizations, obs, recording_sessions
+)
+from app.services.recording_manager_service import recording_manager_service
 
 
 @asynccontextmanager
@@ -24,6 +28,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Database: {get_db_type()}")
     logger.info(f"Hardware: {settings.gpu_info}")
     logger.info(f"VLM Provider: {settings.active_vlm_provider}")
+    logger.info(f"OBS Studio Integration: {'ENABLED' if settings.OBS_ENABLED else 'DISABLED'}")
     logger.info(f"Auto-Publish: {'DISABLED (safe)' if not settings.ENABLE_AUTO_PUBLISH else 'WARNING: ENABLED'}")
 
     # Ensure data directories exist
@@ -33,6 +38,17 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables verified.")
 
+    # Recover any hanging recording sessions after restart
+    db = SessionLocal()
+    try:
+        recovered = recording_manager_service.recover_hanging_sessions(db)
+        if recovered > 0:
+            logger.info(f"Recovered {recovered} hanging recording sessions on startup.")
+    except Exception as e:
+        logger.warning(f"Error during startup session recovery: {e}")
+    finally:
+        db.close()
+
     yield
 
     logger.info(f"{settings.APP_NAME} shutting down.")
@@ -40,8 +56,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.1.0",
-    description="AI-powered highlight clip generation engine for GTA 6 streams",
+    version="0.2.0",
+    description="Automated GTA 6 livestream discovery, authorized recording, and AI highlight clipping engine",
     lifespan=lifespan,
 )
 
@@ -62,6 +78,9 @@ app.include_router(clips.router, prefix=settings.API_PREFIX)
 app.include_router(candidates.router, prefix=settings.API_PREFIX)
 app.include_router(ingestion.router, prefix=settings.API_PREFIX)
 app.include_router(youtube.router, prefix=settings.API_PREFIX)
+app.include_router(authorizations.router, prefix=settings.API_PREFIX)
+app.include_router(obs.router, prefix=settings.API_PREFIX)
+app.include_router(recording_sessions.router, prefix=settings.API_PREFIX)
 
 # Serve clip files and thumbnails as static assets
 clips_dir = Path(settings.CLIPS_DIR)

@@ -118,10 +118,42 @@ The GTA 6 AI Clip Factory is designed with a **Hybrid Edge-First Architecture**:
 
 ---
 
-### 6. Cloud Storage APIs (Optional)
-* **Purpose:** Offsite backup or CDN delivery for rendered vertical clips.
-* **Supported Protocols:** S3-compatible (Cloudflare R2, AWS S3, Google Cloud Storage).
-* **Local Primary:** All MP4 clips, thumbnails, and subtitle files are saved locally on the filesystem under `data/clips/` and served directly by the backend.
+### 6. OBS Studio WebSocket v5 Integration
+* **Purpose:** Automated local recording of authorized livestream feeds using OBS Studio without manual record button clicking.
+* **Features Enabled:**
+  * Real-time RPC connection via WebSocket v5 protocol (port 4455).
+  * Programmatic `StartRecord` and `StopRecord` commands with SHA-256 challenge authentication.
+  * Live recording duration and bytes telemetry.
+  * Local disk storage buffer monitoring ($\ge 5.0$ GB free threshold).
+  * Seamless handoff of completed recordings to local media ingestion and AI clipping.
+* **Official Documentation:** [OBS Studio WebSocket v5 Protocol Specification](https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md)
+* **Configuration:**
+  ```env
+  OBS_HOST="127.0.0.1"
+  OBS_PORT=4455
+  OBS_PASSWORD="your-strong-obs-password"
+  OBS_ENABLED=true
+  ```
+* **Local Offline Resiliency:**
+  * If OBS Studio is closed, the system detects offline state gracefully without crashing.
+  * Built-in simulated mock mode enables full end-to-end testing without a running OBS GUI.
+
+---
+
+### 7. Global YouTube Live Discovery & Daily Quota Manager
+* **Purpose:** Continuous background discovery of public GTA 6 livestreams across YouTube with strict API quota budgeting.
+* **Features Enabled:**
+  * Configurable multi-query search (`GTA 6`, `GTA VI`, `Grand Theft Auto 6`, etc.).
+  * Daily quota consumption meter (default 10,000 units/day ceiling) with automatic UTC midnight rollover.
+  * Deduplication by platform `video_id`.
+  * Automatic synchronization with Creator Authorization records.
+  * Transition detection when livestreams conclude.
+* **Environment Variables:**
+  ```env
+  YOUTUBE_DISCOVERY_KEYWORDS="GTA 6,GTA VI,Grand Theft Auto 6,GTA 6 gameplay,GTA 6 online,GTA 6 live"
+  YOUTUBE_DISCOVERY_INTERVAL_SECONDS=180
+  AUTO_DISCOVERY_ENABLED=true
+  ```
 
 ---
 

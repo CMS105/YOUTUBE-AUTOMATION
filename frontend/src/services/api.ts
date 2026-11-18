@@ -154,6 +154,73 @@ export interface DashboardStats {
   };
 }
 
+export interface LiveDiscovery {
+  id: number;
+  video_id: string;
+  channel_id: string;
+  channel_title: string;
+  title: string;
+  thumbnail_url: string | null;
+  stream_url: string;
+  live_status: "live" | "ended" | "unavailable";
+  authorization_status: "AUTHORIZED" | "AWAITING_AUTHORIZATION" | "REVOKED";
+  recording_status: "IDLE" | "RECORDING" | "RECORDED" | "PROCESSING" | "CLIPPED" | "FAILED";
+  viewer_count?: number | null;
+  detected_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreatorAuthorization {
+  id: number;
+  channel_id: string;
+  creator_name: string;
+  status: "ACTIVE" | "PENDING" | "REVOKED" | "EXPIRED";
+  authorized_source?: string | null;
+  allowed_scope: "clip_creation" | "full_access";
+  authorized_at?: string | null;
+  expires_at?: string | null;
+  revoked_at?: string | null;
+  revocation_reason?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OBSStatus {
+  connected: boolean;
+  host: string;
+  port: number;
+  version?: string | null;
+  is_recording: boolean;
+  recording_time_seconds: number;
+  output_path?: string | null;
+  disk_free_gb: number;
+  disk_total_gb: number;
+  disk_sufficient: boolean;
+  error?: string | null;
+}
+
+export interface RecordingSession {
+  id: number;
+  session_id: string;
+  discovery_id?: number | null;
+  authorization_id?: number | null;
+  channel_id: string;
+  video_id?: string | null;
+  source_input: string;
+  status: "recording" | "completed" | "failed" | "aborted";
+  obs_output_path?: string | null;
+  recording_id?: number | null;
+  started_at: string;
+  ended_at?: string | null;
+  duration_seconds: number;
+  file_size_bytes: number;
+  error_message?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // --- Fetch Helper ---
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
@@ -271,4 +338,120 @@ export const api = {
     }),
   rejectCandidate: (candidateId: number) =>
     fetchApi<ClipCandidate>(`/candidates/${candidateId}/reject`, { method: "POST" }),
+
+  // Live Discoveries
+  getDiscoveries: (params?: {
+    live_status?: string;
+    authorization_status?: string;
+    recording_status?: string;
+    search?: string;
+    skip?: number;
+    limit?: number;
+  }) => {
+    const sp = new URLSearchParams();
+    if (params?.live_status) sp.append("live_status", params.live_status);
+    if (params?.authorization_status) sp.append("authorization_status", params.authorization_status);
+    if (params?.recording_status) sp.append("recording_status", params.recording_status);
+    if (params?.search) sp.append("search", params.search);
+    if (params?.skip !== undefined) sp.append("skip", String(params.skip));
+    if (params?.limit !== undefined) sp.append("limit", String(params.limit));
+    return fetchApi<{
+      items: LiveDiscovery[];
+      total: number;
+      live_count: number;
+      authorized_count: number;
+      recording_count: number;
+      quota_status?: any;
+    }>(`/youtube/discoveries?${sp}`);
+  },
+  pollDiscoveries: (query?: string, maxResults = 15) =>
+    fetchApi<{
+      success: boolean;
+      error?: string;
+      items_discovered: number;
+      new_discoveries: number;
+      query_used: string;
+      quota_status: any;
+    }>("/youtube/discoveries/poll", {
+      method: "POST",
+      body: JSON.stringify({ query, max_results: maxResults }),
+    }),
+  getDiscovery: (id: number) => fetchApi<LiveDiscovery>(`/youtube/discoveries/${id}`),
+
+  // Creator Authorizations
+  getAuthorizations: (params?: { status?: string; search?: string; skip?: number; limit?: number }) => {
+    const sp = new URLSearchParams();
+    if (params?.status) sp.append("status", params.status);
+    if (params?.search) sp.append("search", params.search);
+    if (params?.skip !== undefined) sp.append("skip", String(params.skip));
+    if (params?.limit !== undefined) sp.append("limit", String(params.limit));
+    return fetchApi<{ items: CreatorAuthorization[]; total: number; active_count: number }>(`/authorizations?${sp}`);
+  },
+  authorizeCreator: (data: {
+    channel_id: string;
+    creator_name: string;
+    authorized_source?: string;
+    allowed_scope?: "clip_creation" | "full_access";
+    notes?: string;
+    status?: "ACTIVE" | "PENDING";
+  }) =>
+    fetchApi<CreatorAuthorization>("/authorizations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  revokeAuthorization: (authId: number, reason: string) =>
+    fetchApi<CreatorAuthorization>(`/authorizations/${authId}/revoke`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  // OBS Studio
+  getOBSStatus: () => fetchApi<OBSStatus>("/obs/status"),
+  connectOBS: (params?: { host?: string; port?: number; password?: string }) =>
+    fetchApi<OBSStatus>("/obs/connect", {
+      method: "POST",
+      body: JSON.stringify(params || {}),
+    }),
+  startOBSRecording: (data: { channel_id: string; video_id?: string; discovery_id?: number; custom_source?: string }) =>
+    fetchApi<RecordingSession>("/obs/recording/start", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  stopOBSRecording: (sessionId?: string) => {
+    const sp = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : "";
+    return fetchApi<{
+      success: boolean;
+      session_id?: string;
+      output_path?: string;
+      duration_seconds: number;
+      file_size_bytes: number;
+      message: string;
+    }>(`/obs/recording/stop${sp}`, { method: "POST" });
+  },
+
+  // Recording Sessions
+  getRecordingSessions: (params?: { status?: string; channel_id?: string; skip?: number; limit?: number }) => {
+    const sp = new URLSearchParams();
+    if (params?.status) sp.append("status", params.status);
+    if (params?.channel_id) sp.append("channel_id", params.channel_id);
+    if (params?.skip !== undefined) sp.append("skip", String(params.skip));
+    if (params?.limit !== undefined) sp.append("limit", String(params.limit));
+    return fetchApi<{ items: RecordingSession[]; total: number; active_sessions: number }>(`/recording-sessions?${sp}`);
+  },
+  getRecordingSession: (id: string | number) => fetchApi<RecordingSession>(`/recording-sessions/${id}`),
+  stopRecordingSession: (id: string | number) =>
+    fetchApi<RecordingSession>(`/recording-sessions/${id}/stop`, { method: "POST" }),
+  processRecordingSession: (id: string | number) =>
+    fetchApi<{
+      status: string;
+      session_id: string;
+      recording_id: number;
+      job_id: number;
+      message: string;
+    }>(`/recording-sessions/${id}/process`, { method: "POST" }),
+  runAutomationCycle: () =>
+    fetchApi<{ status: string; discovery_performed: boolean; recordings_started: number; recordings_stopped: number }>(
+      "/recording-sessions/automation/run",
+      { method: "POST" }
+    ),
 };
