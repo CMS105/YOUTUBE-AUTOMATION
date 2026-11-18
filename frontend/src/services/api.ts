@@ -34,6 +34,38 @@ export interface Permission {
   created_at: string;
 }
 
+export interface Recording {
+  id: number;
+  uuid: string;
+  streamer_id: number;
+  stream_id: number | null;
+  file_name: string;
+  file_size_bytes: number | null;
+  duration_seconds: number | null;
+  width: number | null;
+  height: number | null;
+  fps: number | null;
+  codec_video: string | null;
+  codec_audio: string | null;
+  status: string;
+  ingested_at: string;
+  created_at: string;
+}
+
+export interface YouTubePollResult {
+  status: "completed" | "skipped";
+  message?: string;
+  streamers_checked: number;
+  live_streams_detected: number;
+  quota_status?: {
+    used_units: number;
+    daily_limit: number;
+    remaining_units: number;
+    percentage_used: number;
+    last_reset: string;
+  };
+}
+
 export interface Clip {
   id: number;
   uuid: string;
@@ -161,6 +193,26 @@ export const api = {
     fetchApi<Streamer>("/streamers", { method: "POST", body: JSON.stringify(data) }),
   deleteStreamer: (id: number) =>
     fetchApi<{ status: string }>(`/streamers/${id}`, { method: "DELETE" }),
+
+  // YouTube monitoring
+  pollYouTube: () => fetchApi<YouTubePollResult>("/youtube/poll", { method: "POST" }),
+
+  // Authorized recording intake
+  uploadRecording: async (streamerId: number, file: File): Promise<Recording> => {
+    const formData = new FormData();
+    formData.append("streamer_id", String(streamerId));
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE}/ingest/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+      throw new Error(errorData.detail || `Upload failed (HTTP ${response.status})`);
+    }
+    return (await response.json()) as Recording;
+  },
 
   // Permissions
   getPermissions: (streamerId?: number) => {
